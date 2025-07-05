@@ -3,10 +3,42 @@ const sensitivityConfig = {
   yaw: 0.52,
   pitch: 0.49
 };
+// === QUATERNION → MATRIX ===
+function quaternionToMatrix(q) {
+  const { x, y, z, w } = q;
+  return {
+    e00: 1 - 2 * (y * y + z * z),
+    e01: 2 * (x * y - z * w),
+    e02: 2 * (x * z + y * w),
+    e03: 0,
 
-// === APPLY BINDPOSE ===
-function applyBindposeTransform(pos, bindpose) {
-  const x = pos.x, y = pos.y, z = pos.z;
+    e10: 2 * (x * y + z * w),
+    e11: 1 - 2 * (x * x + z * z),
+    e12: 2 * (y * z - x * w),
+    e13: 0,
+
+    e20: 2 * (x * z - y * w),
+    e21: 2 * (y * z + x * w),
+    e22: 1 - 2 * (x * x + y * y),
+    e23: 0
+  };
+}
+
+// === APPLY ROTATION + SCALE + BINDPOSE ===
+function transformBoneHead(pos, rotation, scale, bindpose) {
+  const rotM = quaternionToMatrix(rotation);
+
+  // Apply rotation
+  let x = rotM.e00 * pos.x + rotM.e01 * pos.y + rotM.e02 * pos.z;
+  let y = rotM.e10 * pos.x + rotM.e11 * pos.y + rotM.e12 * pos.z;
+  let z = rotM.e20 * pos.x + rotM.e21 * pos.y + rotM.e22 * pos.z;
+
+  // Apply scale
+  x *= scale.x;
+  y *= scale.y;
+  z *= scale.z;
+
+  // Apply bindpose (final world position)
   return {
     x: bindpose.e00 * x + bindpose.e01 * y + bindpose.e02 * z + bindpose.e03,
     y: bindpose.e10 * x + bindpose.e11 * y + bindpose.e12 * z + bindpose.e13,
@@ -14,10 +46,14 @@ function applyBindposeTransform(pos, bindpose) {
   };
 }
 
-// === TỰ LOCK TÂM NGẮM VÀO BONE HEAD ===
+
 function lockCrosshairToBoneHead(camera, enemy) {
-  const rawHeadPos = enemy.head;
-  const transformedHead = applyBindposeTransform(rawHeadPos, enemy.bindpose);
+  const transformedHead = transformBoneHead(
+    enemy.head,
+    enemy.rotation,
+    enemy.scale,
+    enemy.bindpose
+  );
 
   const dx = transformedHead.x - camera.position.x;
   const dy = transformedHead.y - camera.position.y;
@@ -34,7 +70,7 @@ function lockCrosshairToBoneHead(camera, enemy) {
     deltaY: pitch * sensitivityConfig.pitch
   });
 
-  console.log(`🔒 Locked → Head | Yaw: ${yaw.toFixed(3)} | Pitch: ${pitch.toFixed(3)}`);
+  console.log(`🔒 Locked to Head (Full Transform) | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
 }
 
 // === DRAG + SNAP CỰC MẠNH VÀO ĐẦU ===
@@ -83,18 +119,29 @@ function simulateHeadLocking() {
   };
 
   const enemy = {
-    head: {
-      x: -0.0456970781,
-      y: -0.004478302,
-      z: -0.0200432576
-    },
-    bindpose: {
-      e00: -1.34559613E-13, e01: 8.881784E-14, e02: -1.0, e03: 0.487912,
-      e10: -2.84512817E-06, e11: -1.0, e12: 8.881784E-14, e13: -2.842171E-14,
-      e20: -1.0, e21: 2.84512817E-06, e22: -1.72951931E-13, e23: 0.0,
-      e30: 0.0, e31: 0.0, e32: 0.0, e33: 1.0
-    }
-  };
+  head: {
+    x: -0.0456970781,
+    y: -0.004478302,
+    z: -0.0200432576
+  },
+  rotation: {
+    x: 0.0258174837,
+    y: -0.08611039,
+    z: -0.1402113,
+    w: 0.9860321
+  },
+  scale: {
+    x: 0.99999994,
+    y: 1.00000012,
+    z: 1.0
+  },
+  bindpose: {
+    e00: -1.34559613E-13, e01: 8.881784E-14, e02: -1.0, e03: 0.487912,
+    e10: -2.84512817E-06, e11: -1.0, e12: 8.881784E-14, e13: -2.842171E-14,
+    e20: -1.0, e21: 2.84512817E-06, e22: -1.72951931E-13, e23: 0.0,
+    e30: 0.0, e31: 0.0, e32: 0.0, e33: 1.0
+  }
+};
 
   const armorZone = { x: 0.1, y: 0.1 };
   const currentCrosshair = { x: 0.0, y: 0.0 };
