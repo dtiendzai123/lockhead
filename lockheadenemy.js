@@ -1,13 +1,12 @@
 // === ENHANCED CONFIG ===
 const CONFIG = {
-  sensitivity: { yaw: 0.65, pitch: 0.58 },
+  sensitivity: { yaw: 1.0, pitch: 1.0 },
   targeting: {
-    headRadius: 8.0,
-    snapStrength: 0.92,
+    headRadius: 1.0,
+    snapStrength: 1.0,
     smoothFactor: 0.75,
-    armorPullThreshold: 0.6,
-    maxPullDistance: 80,
-    predictionFactor: 0.15
+  maxPullDistance: 9999,
+    predictionFactor: 0.01
   },
   performance: {
     cacheMatrix: true,
