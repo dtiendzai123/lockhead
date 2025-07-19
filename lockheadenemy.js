@@ -1,17 +1,21 @@
 // === ENHANCED CONFIG ===
 const CONFIG = {
-  sensitivity: { yaw: 1.0, pitch: 1.0 },
+  sensitivity: { yaw: 3.0, pitch: 3.0 },
   targeting: {
     headRadius: 1.0,
     snapStrength: 1.0,
     smoothFactor: 0.75,
   maxPullDistance: 9999,
-    predictionFactor: 0.01
+    predictionFactor: 0.001
   },
   performance: {
     cacheMatrix: true,
     useFastMath: true
   }
+};
+const GamePackages = {
+  GamePackage1: "com.dts.freefireth",
+  GamePackage2: "com.dts.freefiremax"
 };
 
 // === CACHED MATRIX SYSTEM ===
