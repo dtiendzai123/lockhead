@@ -18,13 +18,47 @@ const GamePackages = {
   GamePackage1: "com.dts.freefireth",
   GamePackage2: "com.dts.freefiremax"
 };
-const animatedHead = transformBoneHead(
-  enemy.animBone.head.position,
-  enemy.animBone.head.rotation,
-  enemy.animBone.head.scale,
-  enemy.animBone.head.bindpose,
-  enemy.velocity
-);
+const enemy = {
+  id: 1,
+  health: 100,
+  velocity: { x: 0.02, y: 0.0, z: 0.01 },
+
+  // === Bone head tĩnh (static, không theo animation) ===
+  head: {
+    position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
+    rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
+    scale: { x: 0.99999994, y: 1.00000012, z: 1.0 }
+  },
+
+  // === Xoay toàn nhân vật (gốc) ===
+  rotation: { x: 0, y: 0, z: 0, w: 1 }, // bạn có thể thay đổi nếu cần
+
+  // === Scale nhân vật gốc ===
+  scale: { x: 1, y: 1, z: 1 },
+
+  // === Ma trận bindpose (matrix root) ===
+  bindpose: {
+    e00: -1.34559613e-13, e01: 8.881784e-14, e02: -1.0,        e03: 0.487912,
+    e10: -2.84512817e-06, e11: -1.0,         e12: 8.881784e-14, e13: -2.842171e-14,
+    e20: -1.0,            e21: 2.84512817e-06, e22: -1.72951931e-13, e23: 0.0,
+    e30: 0.0, e31: 0.0, e32: 0.0, e33: 1.0
+  },
+
+  // === Bone động theo animation (nếu có) ===
+  animBone: {
+    head: {
+      position: { x: -0.045, y: -0.004, z: -0.020 }, // có thể thay đổi theo frame
+      rotation: { x: 0.02, y: -0.08, z: -0.14, w: 0.98 },
+      scale: { x: 1, y: 1, z: 1 },
+      bindpose: {
+        e00: -1.34559613e-13, e01: 8.881784e-14, e02: -1.0,        e03: 0.487912,
+        e10: -2.84512817e-06, e11: -1.0,         e12: 8.881784e-14, e13: -2.842171e-14,
+        e20: -1.0,            e21: 2.84512817e-06, e22: -1.72951931e-13, e23: 0.0,
+        e30: 0.0, e31: 0.0, e32: 0.0, e33: 1.0
+      }
+    }
+  }
+};
 // === CACHED MATRIX SYSTEM ===
 const matrixCache = new Map();
 
@@ -148,7 +182,13 @@ function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
 
   const adjustedYaw = yaw * factor * smooth;
   const adjustedPitch = pitch * factor * smooth;
-
+const animatedHead = transformBoneHead(
+  enemy.animBone.head.position,
+  enemy.animBone.head.rotation,
+  enemy.animBone.head.scale,
+  enemy.animBone.head.bindpose,
+  enemy.velocity
+);
   sendInputToMouse({
     deltaX: adjustedYaw * CONFIG.sensitivity.yaw,
     deltaY: adjustedPitch * CONFIG.sensitivity.pitch
