@@ -68,13 +68,67 @@ function transformBoneHead(pos, rotation, scale, bindpose, velocity = null) {
 
   return worldPos;
 }
+// === VECTOR & KALMAN SUPPORT ===
+class Vector3 {
+  constructor(x, y, z) {
+    this.x = x; this.y = y; this.z = z;
+  }
+  static from(obj) {
+    return new Vector3(obj.x, obj.y, obj.z);
+  }
+  static distance(a, b) {
+    const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+}
 
+class KalmanFilter {
+  constructor(R = 0.01, Q = 0.0001) {
+    this.R = R;
+    this.Q = Q;
+    this.A = 1;
+    this.C = 1;
+    this.cov = NaN;
+    this.x = NaN;
+  }
+
+  filter(z) {
+    if (isNaN(this.x)) {
+      this.x = z;
+      this.cov = 1;
+    } else {
+      const predX = this.A * this.x;
+      const predCov = this.A * this.cov * this.A + this.R;
+      const K = predCov * this.C / (this.C * predCov * this.C + this.Q);
+      this.x = predX + K * (z - this.C * predX);
+      this.cov = (1 - K * this.C) * predCov;
+    }
+    return this.x;
+  }
+
+  update(vec) {
+    return new Vector3(
+      this.filter(vec.x),
+      this.filter(vec.y),
+      this.filter(vec.z)
+    );
+  }
+}
+
+const kalman = new KalmanFilter();
 // === LOCK TO BONE HEAD ===
 function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
-  const target = transformBoneHead(enemy.head, enemy.rotation, enemy.scale, enemy.bindpose, enemy.velocity);
-  const dx = target.x - camera.position.x;
-  const dy = target.y - camera.position.y;
-  const dz = target.z - camera.position.z;
+  let rawHead = transformBoneHead(
+    enemy.head, enemy.rotation, enemy.scale,
+    enemy.bindpose, enemy.velocity
+  );
+
+  // ➕ Làm mượt đầu bằng Kalman
+  const filteredHead = kalman.update(Vector3.from(rawHead));
+
+  const dx = filteredHead.x - camera.position.x;
+  const dy = filteredHead.y - camera.position.y;
+  const dz = filteredHead.z - camera.position.z;
 
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (distance > CONFIG.targeting.maxPullDistance) return;
@@ -94,7 +148,7 @@ function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
     deltaY: adjustedPitch * CONFIG.sensitivity.pitch
   });
 
-  console.log(`🎯 Lock → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
+  console.log(`🎯 LOCKED → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
 }
 
 // === MOCK INPUT HANDLER ===
