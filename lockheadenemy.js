@@ -182,7 +182,7 @@ function getBestHeadPosition(enemy) {
     !bone.position || !bone.rotation || !bone.scale || !bone.bindpose ||
     typeof bone.rotation.x !== 'number'
   ) {
-    console.log("⚠️ Invalid or incomplete bone data:", bone);
+    // Dòng log lỗi đã bị loại bỏ để tránh lỗi trong môi trường không hỗ trợ console
     return null;
   }
 
@@ -194,7 +194,6 @@ function getBestHeadPosition(enemy) {
     enemy.velocity
   );
 }
-
 // === LOCK TO HEAD USING FILTER + SAFETY ===
 function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
   const rawHead = getBestHeadPosition(enemy);
