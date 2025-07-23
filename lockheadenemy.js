@@ -173,8 +173,19 @@ class CrosshairTracker {
 const tracker = new CrosshairTracker();
 const kalman = new KalmanFilter();
 // === LOCK TO BONE HEAD ===
+// === GET BEST HEAD POSITION SAFELY ===
 function getBestHeadPosition(enemy) {
   const bone = enemy.animBone?.head || enemy.head;
+
+  if (
+    !bone ||
+    !bone.position || !bone.rotation || !bone.scale || !bone.bindpose ||
+    typeof bone.rotation.x !== 'number'
+  ) {
+    console.warn("⚠️ Invalid or incomplete bone data:", bone);
+    return null;
+  }
+
   return transformBoneHead(
     bone.position,
     bone.rotation,
@@ -183,13 +194,18 @@ function getBestHeadPosition(enemy) {
     enemy.velocity
   );
 }
+
+// === LOCK TO HEAD USING FILTER + SAFETY ===
 function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
   const rawHead = getBestHeadPosition(enemy);
+  if (!rawHead) return; // Skip if data is invalid
+
   const filteredHead = tracker.filter(Vector3.from(rawHead));
 
   const dx = filteredHead.x - camera.position.x;
   const dy = filteredHead.y - camera.position.y;
   const dz = filteredHead.z - camera.position.z;
+
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (distance > CONFIG.targeting.maxPullDistance) return;
 
@@ -200,12 +216,15 @@ function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
   const factor = Math.max(0.3, Math.min(1.0, 10 / distance));
   const smooth = CONFIG.targeting.smoothFactor * deltaTime * 60;
 
+  const adjustedYaw = yaw * factor * smooth;
+  const adjustedPitch = pitch * factor * smooth;
+
   sendInputToMouse({
-    deltaX: yaw * factor * smooth * CONFIG.sensitivity.yaw,
-    deltaY: pitch * factor * smooth * CONFIG.sensitivity.pitch
+    deltaX: adjustedYaw * CONFIG.sensitivity.yaw,
+    deltaY: adjustedPitch * CONFIG.sensitivity.pitch
   });
 
-  console.log(`🎯 LOCK → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
+  console.log(`🎯 Lock → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
 }
 // === MOCK INPUT HANDLER ===
 function sendInputToMouse({ deltaX, deltaY }) {
