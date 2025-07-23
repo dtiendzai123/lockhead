@@ -18,7 +18,13 @@ const GamePackages = {
   GamePackage1: "com.dts.freefireth",
   GamePackage2: "com.dts.freefiremax"
 };
-
+const animatedHead = transformBoneHead(
+  enemy.animBone.head.position,
+  enemy.animBone.head.rotation,
+  enemy.animBone.head.scale,
+  enemy.animBone.head.bindpose,
+  enemy.velocity
+);
 // === CACHED MATRIX SYSTEM ===
 const matrixCache = new Map();
 
