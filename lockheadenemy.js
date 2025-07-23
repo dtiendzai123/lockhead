@@ -182,7 +182,7 @@ function getBestHeadPosition(enemy) {
     !bone.position || !bone.rotation || !bone.scale || !bone.bindpose ||
     typeof bone.rotation.x !== 'number'
   ) {
-    console.warn("⚠️ Invalid or incomplete bone data:", bone);
+    console.log("⚠️ Invalid or incomplete bone data:", bone);
     return null;
   }
 
