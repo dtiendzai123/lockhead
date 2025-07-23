@@ -154,22 +154,42 @@ class KalmanFilter {
     );
   }
 }
+class CrosshairTracker {
+  constructor() {
+    this.kalmanX = new KalmanFilter(0.01, 0.0001);
+    this.kalmanY = new KalmanFilter(0.01, 0.0001);
+    this.kalmanZ = new KalmanFilter(0.01, 0.0001);
+  }
 
+  filter(vec) {
+    return new Vector3(
+      this.kalmanX.filter(vec.x),
+      this.kalmanY.filter(vec.y),
+      this.kalmanZ.filter(vec.z)
+    );
+  }
+}
+
+const tracker = new CrosshairTracker();
 const kalman = new KalmanFilter();
 // === LOCK TO BONE HEAD ===
-function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
-  let rawHead = transformBoneHead(
-    enemy.head, enemy.rotation, enemy.scale,
-    enemy.bindpose, enemy.velocity
+function getBestHeadPosition(enemy) {
+  const bone = enemy.animBone?.head || enemy.head;
+  return transformBoneHead(
+    bone.position,
+    bone.rotation,
+    bone.scale,
+    bone.bindpose,
+    enemy.velocity
   );
-
-  // ➕ Làm mượt đầu bằng Kalman
-  const filteredHead = kalman.update(Vector3.from(rawHead));
+}
+function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
+  const rawHead = getBestHeadPosition(enemy);
+  const filteredHead = tracker.filter(Vector3.from(rawHead));
 
   const dx = filteredHead.x - camera.position.x;
   const dy = filteredHead.y - camera.position.y;
   const dz = filteredHead.z - camera.position.z;
-
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (distance > CONFIG.targeting.maxPullDistance) return;
 
@@ -180,23 +200,13 @@ function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
   const factor = Math.max(0.3, Math.min(1.0, 10 / distance));
   const smooth = CONFIG.targeting.smoothFactor * deltaTime * 60;
 
-  const adjustedYaw = yaw * factor * smooth;
-  const adjustedPitch = pitch * factor * smooth;
-const animatedHead = transformBoneHead(
-  enemy.animBone.head.position,
-  enemy.animBone.head.rotation,
-  enemy.animBone.head.scale,
-  enemy.animBone.head.bindpose,
-  enemy.velocity
-);
   sendInputToMouse({
-    deltaX: adjustedYaw * CONFIG.sensitivity.yaw,
-    deltaY: adjustedPitch * CONFIG.sensitivity.pitch
+    deltaX: yaw * factor * smooth * CONFIG.sensitivity.yaw,
+    deltaY: pitch * factor * smooth * CONFIG.sensitivity.pitch
   });
 
-  console.log(`🎯 LOCKED → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
+  console.log(`🎯 LOCK → Dist=${distance.toFixed(2)} | Yaw=${yaw.toFixed(3)} | Pitch=${pitch.toFixed(3)}`);
 }
-
 // === MOCK INPUT HANDLER ===
 function sendInputToMouse({ deltaX, deltaY }) {
   console.log(`🖱️ Move → ΔX=${deltaX.toFixed(4)} | ΔY=${deltaY.toFixed(4)}`);
