@@ -31,7 +31,7 @@ const enemy = {
   },
 
   // === Xoay toàn nhân vật (gốc) ===
-  rotation: { x: 0, y: 0, z: 0, w: 1 }, // bạn có thể thay đổi nếu cần
+  rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 }, // bạn có thể thay đổi nếu cần
 
   // === Scale nhân vật gốc ===
   scale: { x: 1, y: 1, z: 1 },
@@ -48,7 +48,7 @@ const enemy = {
   animBone: {
     head: {
       position: { x: -0.045, y: -0.004, z: -0.020 }, // có thể thay đổi theo frame
-      rotation: { x: 0.02, y: -0.08, z: -0.14, w: 0.98 },
+      rotation: { x: x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
       scale: { x: 1, y: 1, z: 1 },
       bindpose: {
         e00: -1.34559613e-13, e01: 8.881784e-14, e02: -1.0,        e03: 0.487912,
