@@ -4,10 +4,10 @@ let body = $response.body;
 try { body = JSON.parse($response.body); } catch (e) {}
 // === ENHANCED CONFIG ===
 const CONFIG = {
-  sensitivity: { yaw: 5.0, pitch: 5.0 },
+  sensitivity: { yaw: 9999.0, pitch: 9999.0 },
   targeting: {
     headRadius: 1.0,
-    snapStrength: 10.0,
+    snapStrength: 9999.0,
     smoothFactor: 0.75,
     maxPullDistance: 9999,
     predictionFactor: 0.001
