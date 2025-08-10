@@ -246,17 +246,18 @@ function simulateEnhancedHeadLockingMultipleEnemies() {
 
 // === ENEMY DATA SAMPLE ===
 const enemySample1 = {
-  head: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
-  rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
-  scale: { x: 1.0, y: 1.0, z: 1.0 },
-  bindpose: {
-    e00: -1.3456e-13, e01: 8.88e-14, e02: -1.0, e03: 0.4879,
-    e10: -2.84e-6, e11: -1.0, e12: 8.88e-14, e13: -2.84e-14,
-    e20: -1.0, e21: 2.84e-6, e22: -1.73e-13, e23: 0.0
+  head: {
+    position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
+    rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
+    scale: { x: 1.0, y: 1.0, z: 1.0 },
+    bindpose: {
+      e00: -1.3456e-13, e01: 8.88e-14, e02: -1.0, e03: 0.4879,
+      e10: -2.84e-6, e11: -1.0, e12: 8.88e-14, e13: -2.84e-14,
+      e20: -1.0, e21: 2.84e-6, e22: -1.73e-13, e23: 0.0
+    }
   },
   velocity: { x: 0.05, y: 0.0, z: 0.02 }
 };
-
 const enemySample2 = JSON.parse(JSON.stringify(enemySample1)); // Clone
 
 // === INFINITE LOOP (60FPS) ===
