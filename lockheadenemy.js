@@ -51,7 +51,7 @@ const enemy = {
   // === Bone động theo animation (nếu có) ===
   animBone: {
     head: {
-      position: { x: -0.045, y: -0.004, z: -0.020 }, // có thể thay đổi theo frame
+      position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 }, // có thể thay đổi theo frame
       rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
       scale: { x: 1, y: 1, z: 1 },
       bindpose: {
