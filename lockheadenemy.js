@@ -1,3 +1,7 @@
+let body = $response.body;
+
+// Nếu là JSON thì parse thử
+try { body = JSON.parse($response.body); } catch (e) {}
 // === ENHANCED CONFIG ===
 const CONFIG = {
   sensitivity: { yaw: 5.0, pitch: 5.0 },
@@ -263,3 +267,8 @@ function runInfiniteHeadLock() {
 // === START SYSTEM ===
 console.log("🎮 ENHANCED MULTI-ENEMY AIMING STARTED");
 runInfiniteHeadLock();
+if (typeof body === "object") {
+  $done({ body: JSON.stringify(body) });
+} else {
+  $done({ body });
+}
