@@ -29,13 +29,13 @@ const enemy = {
 
   // === Bone head tĩnh (static, không theo animation) ===
   head: {
-    position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
-    rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
+    boneOffset: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
+    rotationOffset: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
     scale: { x: 0.99999994, y: 1.00000012, z: 1.0 }
   },
 
   // === Xoay toàn nhân vật (gốc) ===
-  rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 }, // bạn có thể thay đổi nếu cần
+  rotationOffset: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 }, // bạn có thể thay đổi nếu cần
 
   // === Scale nhân vật gốc ===
   scale: { x: 1, y: 1, z: 1 },
@@ -51,8 +51,8 @@ const enemy = {
   // === Bone động theo animation (nếu có) ===
   animBone: {
     head: {
-      position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 }, // có thể thay đổi theo frame
-      rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
+      boneOffset: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 }, // có thể thay đổi theo frame
+      rotationOffset: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
       scale: { x: 1, y: 1, z: 1 },
       bindpose: {
         e00: -1.34559613e-13, e01: 8.881784e-14, e02: -1.0,        e03: 0.487912,
@@ -183,16 +183,16 @@ function getBestHeadPosition(enemy) {
 
   if (
     !bone ||
-    !bone.position || !bone.rotation || !bone.scale || !bone.bindpose ||
-    typeof bone.rotation.x !== 'number'
+    !bone.boneOffset || !bone.rotationOffset || !bone.scale || !bone.bindpose ||
+    typeof bone.rotationOffset.x !== 'number'
   ) {
     // Dòng log lỗi đã bị loại bỏ để tránh lỗi trong môi trường không hỗ trợ console
     return null;
   }
 
   return transformBoneHead(
-    bone.position,
-    bone.rotation,
+    bone.boneOffset,
+    bone.rotationOffset,
     bone.scale,
     bone.bindpose,
     enemy.velocity
@@ -200,14 +200,14 @@ function getBestHeadPosition(enemy) {
 }
 // === LOCK TO HEAD USING FILTER + SAFETY ===
 function lockCrosshairToBoneHead(camera, enemy, deltaTime = 0.016) {
-  const rawHead = getBestHeadPosition(enemy);
+  const rawHead = getBestHeadboneOffset(enemy);
   if (!rawHead) return; // Skip if data is invalid
 
   const filteredHead = tracker.filter(Vector3.from(rawHead));
 
-  const dx = filteredHead.x - camera.position.x;
-  const dy = filteredHead.y - camera.position.y;
-  const dz = filteredHead.z - camera.position.z;
+  const dx = filteredHead.x - camera.boneOffset.x;
+  const dy = filteredHead.y - camera.boneOffset.y;
+  const dz = filteredHead.z - camera.boneOffset.z;
 
   const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
   if (distance > CONFIG.targeting.maxPullDistance) return;
@@ -236,7 +236,7 @@ function sendInputToMouse({ deltaX, deltaY }) {
 
 // === MULTI-ENEMY SIMULATION ===
 function simulateEnhancedHeadLockingMultipleEnemies() {
-  const camera = { position: { x: 0, y: 1.7, z: 0 } };
+  const camera = { boneOffset: { x: 0, y: 1.7, z: 0 } };
   const enemies = [enemySample1, enemySample2]; // Reuse
 
   for (const enemy of enemies) {
@@ -247,8 +247,8 @@ function simulateEnhancedHeadLockingMultipleEnemies() {
 // === ENEMY DATA SAMPLE ===
 const enemySample1 = {
   head: {
-    position: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
-    rotation: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
+    boneOffset: { x: -0.0456970781, y: -0.004478302, z: -0.0200432576 },
+    rotationOffset: { x: 0.0258174837, y: -0.08611039, z: -0.1402113, w: 0.9860321 },
     scale: { x: 1.0, y: 1.0, z: 1.0 },
     bindpose: {
       e00: -1.3456e-13, e01: 8.88e-14, e02: -1.0, e03: 0.4879,
