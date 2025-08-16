@@ -158,7 +158,7 @@ function simulateEnhancedHeadLockingMultipleEnemies() {
 }
 
 // === START ===
-$notify("Enhanced HeadLock", "Lock đầu ngay lập tức");
+
 setInterval(simulateEnhancedHeadLockingMultipleEnemies, 16);
 
 $done({ body: typeof body === "object" ? JSON.stringify(body) : body });
